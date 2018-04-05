@@ -9,4 +9,5 @@ public interface GenericDAO<T, ID> {
     void update(T t) throws SQLException;
     void delete(T t) throws SQLException;
     void create(T t) throws SQLException;
+    long getLastID() throws SQLException;
 }
