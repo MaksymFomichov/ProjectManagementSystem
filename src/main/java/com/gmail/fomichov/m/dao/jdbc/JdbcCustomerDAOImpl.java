@@ -8,15 +8,40 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcCustomerDAOImpl implements CustomerDAO {
-    public Customer getById(Long aLong) throws SQLException {
-        return null;
+    public Customer getById(Long id) throws SQLException {
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM customers WHERE id = " + id);
+        Customer customer = new Customer();
+        while (resultSet.next()) {
+            customer.setId(resultSet.getLong("id"));
+            customer.setName(resultSet.getString("name"));
+            customer.setCapitalization(resultSet.getInt("capitalization"));
+            customer.setFounder(resultSet.getString("founder"));
+        }
+        resultSet.close();
+        statement.close();
+        return customer;
     }
 
     public List<Customer> getAll() throws SQLException {
-        return null;
+        List<Customer> list = new ArrayList<Customer>();
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT id, name, capitalization, founder FROM customers");
+        while (resultSet.next()) {
+            Customer customer = new Customer();
+            customer.setId(resultSet.getLong("id"));
+            customer.setName(resultSet.getString("name"));
+            customer.setCapitalization(resultSet.getInt("capitalization"));
+            customer.setFounder(resultSet.getString("founder"));
+            list.add(customer);
+        }
+        resultSet.close();
+        statement.close();
+        return list;
     }
 
     public void update(Customer customer) throws SQLException {
@@ -39,7 +64,7 @@ public class JdbcCustomerDAOImpl implements CustomerDAO {
 
     public long getLastID() throws SQLException {
         Statement statement = ConnectionUtil.getConnection().createStatement();
-        String sql = "SELECT id FROM customers ORDER BY id DESK LIMIT 1";
+        String sql = "SELECT id FROM customers ORDER BY id DESC LIMIT 1";
         ResultSet resultSet = null;
         try {
             resultSet = statement.executeQuery(sql);

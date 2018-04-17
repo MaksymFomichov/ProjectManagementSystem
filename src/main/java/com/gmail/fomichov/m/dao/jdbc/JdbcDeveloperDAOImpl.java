@@ -8,24 +8,60 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcDeveloperDAOImpl implements DeveloperDAO {
 
-    public Developer getById(Long aLong) throws SQLException {
-        return null;
+    public Developer getById(Long id) throws SQLException {
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM developers WHERE id = " + id);
+        Developer developer = new Developer();
+        while (resultSet.next()) {
+            developer.setId(resultSet.getLong("id"));
+            developer.setName(resultSet.getString("name"));
+            developer.setAge(resultSet.getInt("age"));
+            developer.setSex(resultSet.getBoolean("sex"));
+            developer.setSalary(resultSet.getBigDecimal("salary"));
+        }
+        resultSet.close();
+        statement.close();
+        return developer;
     }
 
     public List<Developer> getAll() throws SQLException {
-        return null;
+        List<Developer> list = new ArrayList<Developer>();
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT id, name, age, sex, salary FROM developers");
+        while (resultSet.next()) {
+            Developer developer = new Developer();
+            developer.setId(resultSet.getLong("id"));
+            developer.setName(resultSet.getString("name"));
+            developer.setAge(resultSet.getInt("age"));
+            developer.setSex(resultSet.getBoolean("sex"));
+            developer.setSalary(resultSet.getBigDecimal("salary"));
+            list.add(developer);
+        }
+        resultSet.close();
+        statement.close();
+        return list;
     }
 
     public void update(Developer developer) throws SQLException {
-
+        PreparedStatement statement = ConnectionUtil.getConnection().prepareStatement("UPDATE developers SET name = ?, age = ?, sex = ?, salary = ? WHERE id = ?");
+        statement.setString(1, developer.getName());
+        statement.setInt(2, developer.getAge());
+        statement.setBoolean(3, developer.getSex());
+        statement.setBigDecimal(4, developer.getSalary());
+        statement.setLong(5, developer.getId());
+        statement.executeUpdate();
+        statement.close();
     }
 
     public void delete(Developer developer) throws SQLException {
-
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        statement.executeUpdate("DELETE FROM developers WHERE id=" + developer.getId());
+        statement.close();
     }
 
     public void create(Developer developer) throws SQLException {
@@ -41,7 +77,7 @@ public class JdbcDeveloperDAOImpl implements DeveloperDAO {
 
     public long getLastID() throws SQLException {
         Statement statement = ConnectionUtil.getConnection().createStatement();
-        String sql = "SELECT id FROM developers ORDER BY id DESK LIMIT 1";
+        String sql = "SELECT id FROM developers ORDER BY id DESC LIMIT 1";
         ResultSet resultSet = null;
         try {
             resultSet = statement.executeQuery(sql);

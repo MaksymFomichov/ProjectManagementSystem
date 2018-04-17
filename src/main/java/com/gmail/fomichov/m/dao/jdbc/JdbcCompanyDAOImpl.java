@@ -8,15 +8,40 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcCompanyDAOImpl implements CompanyDAO {
-    public Company getById(Long aLong) throws SQLException {
-        return null;
+    public Company getById(Long id) throws SQLException {
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM companies WHERE id = " + id);
+        Company company = new Company();
+        while (resultSet.next()) {
+            company.setId(resultSet.getLong("id"));
+            company.setName(resultSet.getString("name"));
+            company.setCapitalization(resultSet.getInt("capitalization"));
+            company.setFounder(resultSet.getString("founder"));
+        }
+        resultSet.close();
+        statement.close();
+        return company;
     }
 
     public List<Company> getAll() throws SQLException {
-        return null;
+        List<Company> list = new ArrayList<Company>();
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT id, name, capitalization, founder FROM companies");
+        while (resultSet.next()) {
+            Company company = new Company();
+            company.setId(resultSet.getLong("id"));
+            company.setName(resultSet.getString("name"));
+            company.setCapitalization(resultSet.getInt("capitalization"));
+            company.setFounder(resultSet.getString("founder"));
+            list.add(company);
+        }
+        resultSet.close();
+        statement.close();
+        return list;
     }
 
     public void update(Company company) throws SQLException {
@@ -24,7 +49,9 @@ public class JdbcCompanyDAOImpl implements CompanyDAO {
     }
 
     public void delete(Company company) throws SQLException {
-
+        Statement statement = ConnectionUtil.getConnection().createStatement();
+        statement.executeUpdate("DELETE FROM companies WHERE id=" + company.getId());
+        statement.close();
     }
 
     public void create(Company company) throws SQLException {
@@ -39,7 +66,7 @@ public class JdbcCompanyDAOImpl implements CompanyDAO {
 
     public long getLastID() throws SQLException {
         Statement statement = ConnectionUtil.getConnection().createStatement();
-        String sql = "SELECT id FROM companies ORDER BY id DESK LIMIT 1";
+        String sql = "SELECT id FROM companies ORDER BY id DESC LIMIT 1";
         ResultSet resultSet = null;
         try {
             resultSet = statement.executeQuery(sql);
